@@ -1,16 +1,88 @@
-plugins {
-    id 'java'
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'http://repo.spring.io/plugins-release' }
+    }
+    dependencies {
+        classpath "io.spring.gradle:propdeps-plugin:$propDepsPluginVersion"
+        classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagementPlugin"
+    }
 }
 
-group 'org.biacode.escommons-test'
-version '0.0.1-SNAPSHOT'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
+def withoutElasticsearch = {
+    exclude group: "org.elasticsearch", module: 'elasticsearch'
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+allprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'propdeps'
+    apply plugin: 'propdeps-idea'
+    apply plugin: 'propdeps-maven'
+    apply plugin: 'propdeps-eclipse'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'http://repo.spring.io/plugins-release' }
+    }
+
+    sourceCompatibility = 1.8
+
+    group "$platformGroup"
+    version "$platformVersion"
+
+    task makePretty(type: Delete) {
+        delete 'out'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.spring.platform:platform-bom:$springPlatformBom"
+        }
+    }
+
+    dependencies {
+        implementation "org.slf4j:slf4j-api:$slf4jVersion"
+        implementation "org.slf4j:log4j-over-slf4j:$slf4jVersion"
+        implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
+        implementation "org.apache.logging.log4j:log4j-api:$log4jVersion"
+        implementation "org.apache.commons:commons-lang3:$apacheCommonsLang3Version"
+        implementation "commons-io:commons-io:$apacheCommonsIoVersion"
+        implementation "io.vavr:vavr:$vavrVersion"
+        implementation "com.google.code.findbugs:jsr305:$jsr305Version"
+        testImplementation "junit:junit:$junitVersion"
+        testImplementation "org.easymock:easymock:$easymockVersion"
+        testImplementation "org.assertj:assertj-core:$assertJVersion"
+    }
+}
+
+project(':escommons-test-core') {
+
+    apply plugin: 'maven'
+
+    dependencies {
+        implementation "org.springframework:spring-context"
+        implementation "org.elasticsearch:elasticsearch:$elasticSearchVersion"
+        implementation "org.elasticsearch.client:transport:$elasticSearchVersion", withoutElasticsearch
+        implementation "org.elasticsearch.plugin:transport-netty4-client:$elasticSearchVersion", withoutElasticsearch
+        implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticSearchVersion", withoutElasticsearch
+    }
+}
+
+project(':escommons-test-starter-boot') {
+
+    apply plugin: 'maven'
+
+    dependencies {
+        implementation project(':escommons-test-core')
+        implementation "org.springframework.boot:spring-boot-starter"
+        optional "org.springframework.boot:spring-boot-configuration-processor"
+    }
+
+    compileJava.dependsOn(processResources)
 }

@@ -1,2 +1,4 @@
 rootProject.name = 'escommons-test'
 
+include 'escommons-test-core'
+include 'escommons-test-starter-boot'
