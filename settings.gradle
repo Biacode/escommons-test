@@ -1,4 +1,5 @@
 rootProject.name = 'escommons-test'
 
 include 'escommons-test-core'
+include 'escommons-test-core-integrationtest'
 include 'escommons-test-starter-boot'

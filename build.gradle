@@ -1,3 +1,4 @@
+//region build script
 buildscript {
     repositories {
         mavenLocal()
@@ -10,11 +11,15 @@ buildscript {
         classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagementPlugin"
     }
 }
+//endregion
 
+//region definitions
 def withoutElasticsearch = {
     exclude group: "org.elasticsearch", module: 'elasticsearch'
 }
+//endregion
 
+//region all projects
 allprojects {
 
     apply plugin: 'java'
@@ -60,7 +65,9 @@ allprojects {
         testImplementation "org.assertj:assertj-core:$assertJVersion"
     }
 }
+//endregion
 
+//region escommons-test-core
 project(':escommons-test-core') {
 
     apply plugin: 'maven'
@@ -74,6 +81,21 @@ project(':escommons-test-core') {
     }
 }
 
+project(':escommons-test-core-integrationtest') {
+
+    dependencies {
+        testImplementation "org.springframework:spring-context"
+        testImplementation "org.elasticsearch:elasticsearch:$elasticSearchVersion"
+        testImplementation "org.elasticsearch.client:transport:$elasticSearchVersion", withoutElasticsearch
+        testImplementation "org.elasticsearch.plugin:transport-netty4-client:$elasticSearchVersion", withoutElasticsearch
+        testImplementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticSearchVersion", withoutElasticsearch
+        testImplementation project(':escommons-test-core')
+        testImplementation "org.springframework:spring-test"
+    }
+}
+//endregion
+
+//region escommons-test-starter-boot
 project(':escommons-test-starter-boot') {
 
     apply plugin: 'maven'
@@ -86,3 +108,4 @@ project(':escommons-test-starter-boot') {
 
     compileJava.dependsOn(processResources)
 }
+//endregion
