@@ -6,16 +6,6 @@ buildscript {
         jcenter()
         maven { url 'http://repo.spring.io/plugins-release' }
     }
-    dependencies {
-        classpath "io.spring.gradle:propdeps-plugin:$propDepsPluginVersion"
-        classpath "io.spring.gradle:dependency-management-plugin:$springDependencyManagementPlugin"
-    }
-}
-//endregion
-
-//region definitions
-def withoutElasticsearch = {
-    exclude group: "org.elasticsearch", module: 'elasticsearch'
 }
 //endregion
 
@@ -23,11 +13,7 @@ def withoutElasticsearch = {
 allprojects {
 
     apply plugin: 'java'
-    apply plugin: 'propdeps'
-    apply plugin: 'propdeps-idea'
-    apply plugin: 'propdeps-maven'
-    apply plugin: 'propdeps-eclipse'
-    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'idea'
 
     repositories {
         mavenLocal()
@@ -45,24 +31,18 @@ allprojects {
         delete 'out'
     }
 
-    dependencyManagement {
-        imports {
-            mavenBom "io.spring.platform:platform-bom:$springPlatformBom"
-        }
-    }
-
     dependencies {
-        implementation "org.slf4j:slf4j-api:$slf4jVersion"
-        implementation "org.slf4j:log4j-over-slf4j:$slf4jVersion"
-        implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
-        implementation "org.apache.logging.log4j:log4j-api:$log4jVersion"
-        implementation "org.apache.commons:commons-lang3:$apacheCommonsLang3Version"
-        implementation "commons-io:commons-io:$apacheCommonsIoVersion"
-        implementation "io.vavr:vavr:$vavrVersion"
-        implementation "com.google.code.findbugs:jsr305:$jsr305Version"
-        testImplementation "junit:junit:$junitVersion"
-        testImplementation "org.easymock:easymock:$easymockVersion"
-        testImplementation "org.assertj:assertj-core:$assertJVersion"
+        compile "org.slf4j:slf4j-api:$slf4jVersion"
+        compile "org.slf4j:log4j-over-slf4j:$slf4jVersion"
+        compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
+        compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
+        compile "org.apache.commons:commons-lang3:$apacheCommonsLang3Version"
+        compile "commons-io:commons-io:$apacheCommonsIoVersion"
+        compile "io.vavr:vavr:$vavrVersion"
+        compile "com.google.code.findbugs:jsr305:$jsr305Version"
+        testCompile "junit:junit:$junitVersion"
+        testCompile "org.easymock:easymock:$easymockVersion"
+        testCompile "org.assertj:assertj-core:$assertJVersion"
     }
 }
 //endregion
@@ -73,24 +53,21 @@ project(':escommons-test-core') {
     apply plugin: 'maven'
 
     dependencies {
-        implementation "org.springframework:spring-context"
-        implementation "org.elasticsearch:elasticsearch:$elasticSearchVersion"
-        implementation "org.elasticsearch.client:transport:$elasticSearchVersion", withoutElasticsearch
-        implementation "org.elasticsearch.plugin:transport-netty4-client:$elasticSearchVersion", withoutElasticsearch
-        implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticSearchVersion", withoutElasticsearch
+        compile "org.elasticsearch:elasticsearch:$elasticSearchVersion"
+        compile "org.elasticsearch.client:transport:$elasticSearchVersion"
+        compile "org.codelibs.elasticsearch.lib:plugin-classloader:$elasticSearchVersion"
+        compile "org.elasticsearch.plugin:transport-netty4-client:$elasticSearchVersion"
+        compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticSearchVersion"
+        compile "org.springframework:spring-context:$springFrameworkVersion"
     }
 }
 
 project(':escommons-test-core-integrationtest') {
 
     dependencies {
-        testImplementation "org.springframework:spring-context"
-        testImplementation "org.elasticsearch:elasticsearch:$elasticSearchVersion"
-        testImplementation "org.elasticsearch.client:transport:$elasticSearchVersion", withoutElasticsearch
-        testImplementation "org.elasticsearch.plugin:transport-netty4-client:$elasticSearchVersion", withoutElasticsearch
-        testImplementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$elasticSearchVersion", withoutElasticsearch
-        testImplementation project(':escommons-test-core')
-        testImplementation "org.springframework:spring-test"
+        compile project(':escommons-test-core')
+        testCompile "org.springframework:spring-test:$springFrameworkVersion"
+        testCompile "org.slf4j:slf4j-simple:$slf4jVersion"
     }
 }
 //endregion
@@ -99,11 +76,9 @@ project(':escommons-test-core-integrationtest') {
 project(':escommons-test-starter-boot') {
 
     apply plugin: 'maven'
-
     dependencies {
-        implementation project(':escommons-test-core')
-        implementation "org.springframework.boot:spring-boot-starter"
-        optional "org.springframework.boot:spring-boot-configuration-processor"
+        compile project(':escommons-test-core')
+        compile "org.springframework.boot:spring-boot-starter:$springBootVersion"
     }
 
     compileJava.dependsOn(processResources)
